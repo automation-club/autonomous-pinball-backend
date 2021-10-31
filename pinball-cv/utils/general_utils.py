@@ -243,10 +243,10 @@ if __name__ == "__main__":
 
     DisplayUtils.display_img(
         DisplayUtils.create_img_grid_list(
-            pinball_util.display_pipeline,
-            len(pinball_util.display_pipeline) // 2,
-            len(pinball_util.display_pipeline)
-            // (len(pinball_util.display_pipeline) // 2),
+            pinball_util._display_pipeline,
+            len(pinball_util._display_pipeline) // 2,
+            len(pinball_util._display_pipeline)
+            // (len(pinball_util._display_pipeline) // 2),
         ),
         resolution_scale=0.25,
     )

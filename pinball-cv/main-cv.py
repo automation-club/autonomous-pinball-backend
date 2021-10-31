@@ -12,51 +12,49 @@ from config import logger  # so that we don't need to say config.logger every ti
 # create utils
 gen_utils = GeneralUtils()
 disp_utils = DisplayUtils()
-pinball_utils = PinballUtils()
+pinball_utils = PinballUtils(track_pipeline=config.DISPLAY_PIPELINE)
 
 # houses corners of playfield for unwarpping
 playfield_corners = np.array([])
 
-logger.info(f"Opening video capture camera {config.VIDEO_CAPTURE_NUMBER}")
-cap = cv2.VideoCapture(config.VIDEO_CAPTURE_NUMBER)
+logger.info(f"Opening video capture {config.VIDEO_CAPTURE_INPUT}")
+cap = cv2.VideoCapture(config.VIDEO_CAPTURE_INPUT)
 if not cap.isOpened():
-    logger.error(f"Cannot open camera {config.VIDEO_CAPTURE_NUMBER}")
+    logger.critical(f"Cannot open video capture {config.VIDEO_CAPTURE_INPUT}")
+    exit()
 
-    logger.info("Opening video capture camera 0")
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
-        logger.error(f"Cannot open camera 0")
-
-        logger.info(f"Opening video at {config.VIDEO_PATH}")
-        cap = cv2.VideoCapture(str(config.VIDEO_PATH))
-        if not cap.isOpened():
-            logger.critical(f"Cannot open video at {config.VIDEO_PATH}")
-            exit()
-
-logger.info("==============================\nStarting ball tracking\n==============================")
+logger.info(
+    "\n==============================\nStarting ball tracking\n=============================="
+)
 
 
 frame_count = 0
 """int: number of frames since start of program."""
 
+frame = np.array([])
 while True:
     # Use a timer to keep track of speed of algorithm
     timer = cv2.getTickCount()
 
     # Capture frame-by-frame
+    prev_frame = frame
     ret, frame = cap.read()
     frame_count += 1
     if not ret:
         logger.error("Failed to read from video capture")
-        continue
+        # continue
+        frame = prev_frame
 
     # Apply algorithm
 
     # If there is no playfield detected, find it
     # Also re-find playfield once every n frames to save compute and account for slight movements
-    if playfield_corners.size == 0 or frame_count % config.UPDATE_PLAYFIELD_INTERVAL == 0:
+    if (
+        playfield_corners.size == 0
+        or frame_count % config.UPDATE_PLAYFIELD_INTERVAL == 0
+    ):
         playfield = pinball_utils.get_playfield_corners(frame)
-        logger.INFO(f"Detected playfield corners: {playfield}")
+        logger.info(f"Detected playfield corners: {playfield}")
         if playfield.size != 0:
             playfield_corners = playfield
         else:
@@ -64,7 +62,7 @@ while True:
 
     # If there is already a playfield detected, unwarp the frame with saved corners
     if playfield_corners.size != 0:
-        frame = gen_utils.unwarp_rect(frame, playfield_corners)
+        frame_unwarp = gen_utils.unwarp_rect(frame, playfield_corners)
 
     # Displaying
 
@@ -73,7 +71,7 @@ while True:
     fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
     fps = round(fps, 2)
 
-    # Displaying on a copied frame
+    # Display a copy of the image which we draw on
     disp_img = frame.copy()
 
     if config.DRAW_OUTPUT:
@@ -89,8 +87,24 @@ while True:
 
         cv2.imshow(
             "video feed",
-            disp_utils.resize_img(disp_img, resolution_scale=config.DISPLAY_RESOLUTION_SCALE),
+            disp_utils.resize_img(
+                disp_img, resolution_scale=config.DISPLAY_RESOLUTION_SCALE
+            ),
         )
+
+        if config.DISPLAY_PIPELINE:
+            pipeline = pinball_utils.display_pipeline
+            cv2.imshow(
+                "video pipeline",
+                DisplayUtils.resize_img(
+                    DisplayUtils.create_img_grid_list(
+                        pipeline,
+                        len(pipeline) // 2,
+                        len(pipeline) // (len(pipeline) // 2),
+                    ),
+                    resolution_scale=0.25,
+                ),
+            )
 
     # Stop the program if ESC key is pressed
     if cv2.waitKey(1) & 0xFF == 27:
