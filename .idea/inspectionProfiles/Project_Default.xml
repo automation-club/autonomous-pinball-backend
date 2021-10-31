@@ -2,43 +2,10 @@
   <profile version="1.0">
     <option name="myName" value="Project Default" />
     <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="ignoredPackages">
-        <value>
-          <list size="18">
-            <item index="0" class="java.lang.String" itemvalue="motor" />
-            <item index="1" class="java.lang.String" itemvalue="dnspython" />
-            <item index="2" class="java.lang.String" itemvalue="firebase-admin" />
-            <item index="3" class="java.lang.String" itemvalue="pymongo" />
-            <item index="4" class="java.lang.String" itemvalue="asyncio" />
-            <item index="5" class="java.lang.String" itemvalue="matplotlib" />
-            <item index="6" class="java.lang.String" itemvalue="ortools" />
-            <item index="7" class="java.lang.String" itemvalue="gunicorn" />
-            <item index="8" class="java.lang.String" itemvalue="pyrebase" />
-            <item index="9" class="java.lang.String" itemvalue="google-api-python-client" />
-            <item index="10" class="java.lang.String" itemvalue="seaborn" />
-            <item index="11" class="java.lang.String" itemvalue="waitress" />
-            <item index="12" class="java.lang.String" itemvalue="numpy" />
-            <item index="13" class="java.lang.String" itemvalue="pendulum" />
-            <item index="14" class="java.lang.String" itemvalue="Flask" />
-            <item index="15" class="java.lang.String" itemvalue="google-auth" />
-            <item index="16" class="java.lang.String" itemvalue="holidays" />
-            <item index="17" class="java.lang.String" itemvalue="python-dotenv" />
-          </list>
-        </value>
-      </option>
-    </inspection_tool>
     <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
       <option name="ignoredErrors">
         <list>
           <option value="E203" />
-        </list>
-      </option>
-    </inspection_tool>
-    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="ignoredIdentifiers">
-        <list>
-          <option value="dict" />
         </list>
       </option>
     </inspection_tool>
