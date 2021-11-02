@@ -1,5 +1,6 @@
 # Ignore datasets
 **/datasets
+/pinball-cv/datasets/
 
 # Ignore comptuer specific IDE configs
 **/.idea/workspace.xml
