@@ -1,5 +1,5 @@
 # Ignore datasets
-**/datasets/
+**/datasets
 
 # Ignore comptuer specific IDE configs
 **/.idea/workspace.xml
