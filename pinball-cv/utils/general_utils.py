@@ -239,6 +239,7 @@ if __name__ == "__main__":
     pinball_util = PinballUtils()
     img = cv2.imread("./datasets/pinball-tape-img-redo.jpg")
     playfield = pinball_util.get_playfield_corners(img)
+    playfield = playfield.astype(np.uint8)
     cv2.imshow("playfield", playfield)
 
     DisplayUtils.display_img(
