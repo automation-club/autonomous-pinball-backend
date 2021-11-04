@@ -2,6 +2,7 @@
 import logging
 
 import numpy as np
+import numpy.typing as npt
 import cv2
 
 from utils import *
@@ -63,7 +64,9 @@ def main():
 
         # If there is already a playfield detected, unwarp the frame with saved corners
         if playfield_corners.size != 0:
-            frame_unwarp = gen_utils.unwarp_rect(frame, playfield_corners)
+            frame_unwarp = gen_utils.warp_img_to_rect(frame, playfield_corners)
+        else:
+            frame_unwarp = frame.copy()
 
         # Displaying
 
@@ -74,6 +77,7 @@ def main():
 
         # Display a copy of the image which we draw on
         disp_img = frame.copy()
+        # disp_img = frame_unwarp.copy()
 
         if config.DRAW_OUTPUT:
             cv2.putText(
@@ -86,6 +90,7 @@ def main():
                 2,
             )
 
+            disp_utils.draw_circles(disp_img, playfield_corners, radius=10)
             cv2.imshow(
                 "video feed",
                 disp_utils.resize_img(
@@ -94,6 +99,7 @@ def main():
             )
 
             if config.DISPLAY_PIPELINE:
+                # TODO make this clear every time
                 pipeline = pinball_utils.display_pipeline
                 cv2.imshow(
                     "video pipeline",

@@ -1,11 +1,20 @@
 """Houses general image utilities in class GeneralUtils"""
+import typing
+
+import numpy.typing as npt
 import cv2
 import numpy as np
 
+# from config import logger
+from . import logger
 
 class GeneralUtils:
+    """Houses general utilities for manipulating images with OpenCV and Numpy."""
     @classmethod
     def canny(cls, img, lower_thresh=None, upper_thresh=None, clean=True):
+        # Applies canny edge detection on given image.
+        # The image to apply canny edge detection on.
+        # The image to apply canny edge detection on.
         if lower_thresh is None or upper_thresh is None:
             median = np.median(img)
             sigma = 0.33
@@ -42,7 +51,20 @@ class GeneralUtils:
         return cv2.GaussianBlur(res, (3, 3), 0)
 
     @classmethod
-    def sort_rect_points(cls, points_new):
+    def sort_rect_points(cls, points_new: np.ndarray) -> np.ndarray:
+        """Sorts provided points of a rectangle.
+
+        Follows format: TODO
+
+        Parameters
+        ----------
+        points_new : np.ndarray
+            The points of the rectangle to sort.
+
+        Returns
+        -------
+
+        """
         points_old = np.array(points_new).reshape(4, 2)
         points_new = np.zeros((4, 1, 2), dtype=np.int32)
         sum = points_old.sum(1)
@@ -55,8 +77,26 @@ class GeneralUtils:
         return points_new
 
     @classmethod
-    def unwarp_rect(cls, img, rect_points):
+    def warp_img_to_rect(cls, img: np.ndarray, rect_points: np.ndarray) -> np.ndarray:
+        """Warps given image to the given rectangle points array.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            The image to warp.
+        rect_points : np.ndarray
+            The points of the new corners of the image to warp to. Must be valid points on the provided image.
+            Follows format TODO.
+
+        Returns
+        -------
+        new_img : np.ndarray
+            The warped image.
+        """
+        logger.debug(f"input rect_points: {rect_points}")
+
         rect_points = cls.sort_rect_points(rect_points).astype(np.float32)
+        logger.debug(f"sorted rect_points: {rect_points}")
         corner_points = np.array(
             [
                 [0, 0],
@@ -66,6 +106,7 @@ class GeneralUtils:
             ],
             dtype=np.float32,
         )
+        logger.debug(f"new corner points: {corner_points}")
 
         trans_mat = cv2.getPerspectiveTransform(rect_points, corner_points)
         return cv2.warpPerspective(img, trans_mat, (img.shape[1], img.shape[0]))
@@ -235,20 +276,25 @@ class GeneralUtils:
         return new_contours
 
 
-if __name__ == "__main__":
+def main():
+    """Run simple tests to see if the processing of the image using these utils works."""
     pinball_util = PinballUtils()
     img = cv2.imread("./datasets/pinball-tape-img-redo.jpg")
-    playfield = pinball_util.get_playfield_corners(img)
+    playfield = pinball_util.get_playfield_corners(img).astype(np.uint8)
     cv2.imshow("playfield", playfield)
 
+    pipeline = pinball_utils.display_pipeline
     DisplayUtils.display_img(
         DisplayUtils.create_img_grid_list(
-            pinball_util._display_pipeline,
-            len(pinball_util._display_pipeline) // 2,
-            len(pinball_util._display_pipeline)
-            // (len(pinball_util._display_pipeline) // 2),
-        ),
+            pipeline,
+            len(pipeline) // 2,
+            len(pipeline) // (len(pipeline) // 2),
+            ),
         resolution_scale=0.25,
-    )
+    ),
 
     cv2.waitKey(-1)
+
+
+if __name__ == "__main__":  # only runs when this isn't used as a module
+    main()
