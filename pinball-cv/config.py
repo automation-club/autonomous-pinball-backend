@@ -46,9 +46,9 @@ IMG_PATH = DATASET_PATH / "pinball-tape-img-redo.jpg"
 # Functional
 UPDATE_PLAYFIELD_INTERVAL = 60
 """int: number of frames per update of corners of playfield."""
-VIDEO_CAPTURE_NUMBER = 1
+VIDEO_CAPTURE_NUMBER = 2
 """int: the capture camera number to try to read from."""
-VIDEO_CAPTURE_INPUT = str(VIDEO_PATH)
+VIDEO_CAPTURE_INPUT = VIDEO_CAPTURE_NUMBER  # str(VIDEO_PATH)
 """Any: the actual input to the cv2.VideoCapture function. Can be swapped between VIDEO_CAPTURE_NUMBER, VIDEO_PATH, 
 IMG_PATH, etc. """
 
@@ -57,5 +57,5 @@ DRAW_OUTPUT = True
 """bool: whether to display the live feed on screen."""
 DISPLAY_RESOLUTION_SCALE = 1
 """int: the resolution to display the live feed at."""
-DISPLAY_PIPELINE = False
+DISPLAY_PIPELINE = True
 """bool: whether to display the image pipeline on the screen."""
