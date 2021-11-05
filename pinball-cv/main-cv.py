@@ -1,20 +1,17 @@
 """Runs the main loop to detect the pinball on the playfield."""
-import logging
 
 import numpy as np
-import numpy.typing as npt
 import cv2
 
-import config
-from config import logger  # so that we don't need to say config.logger every time
+# import utils.config as config  # so that we don't need to say utils.config every time
+# from utils.config import logger  # so that we don't need to say config.logger every time
+# from utils.general_utils import GeneralUtils
+# from utils.display_utils import DisplayUtils
+# from utils.pinball_utils import PinballUtils
+from utils import *
 
-from utils.general_utils import GeneralUtils
-from utils.display_utils import DisplayUtils
-from utils.pinball_utils import PinballUtils
 
-
-### TODOS:
-# TODO: get rid of prints and replace with logging
+# TODOS:
 # TODO: add documentation everywhere
 
 
@@ -60,8 +57,8 @@ def main():
         # If there is no playfield detected, find it
         # Also re-find playfield once every n frames to save compute and account for slight movements
         if (
-            playfield_corners.size == 0
-            or frame_count % config.UPDATE_PLAYFIELD_INTERVAL == 0
+                playfield_corners.size == 0
+                or frame_count % config.UPDATE_PLAYFIELD_INTERVAL == 0
         ):
             playfield = pinball_utils.get_playfield_corners(frame)
             logger.info(f"Detected playfield corners: {playfield}")

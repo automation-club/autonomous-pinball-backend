@@ -1,11 +1,8 @@
 """Houses general image utilities in class GeneralUtils"""
-import typing
 
-import numpy.typing as npt
 import cv2
 import numpy as np
 
-# from config import logger
 from . import logger
 
 class GeneralUtils:
@@ -208,7 +205,6 @@ class GeneralUtils:
         # TODO need to fix to make this work
         filtered = []
         for contour, h in zip(contours, hierarchy):
-            print(h)
             if cv2.isContourConvex(contour) and h[2] != -1:
                 filtered.append(contour)
 

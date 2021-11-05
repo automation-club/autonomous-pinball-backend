@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 from .general_utils import GeneralUtils
-
+from .config import logger
 
 class PinballUtils:
     def __init__(self, track_pipeline=False):
@@ -14,11 +14,11 @@ class PinballUtils:
     def get_playfield_corners(self, img):
         # Saving a copy of the image to return after cropping into the field
         org_img = img.copy()
-        self.append_to_pipeline(org_img)
+        self._append_to_pipeline(org_img)
 
         cv2.normalize(img, img, 0, 255, cv2.NORM_MINMAX)
         blurred = cv2.GaussianBlur(img, (5, 5), 0)
-        self.append_to_pipeline(blurred)
+        self._append_to_pipeline(blurred)
 
         lower_yellow = [15, 100, 200]
         upper_yellow = [40, 255, 255]
@@ -32,7 +32,7 @@ class PinballUtils:
         if np.array(centroids_yellow).shape != (2, 2) or np.array(
             centroids_blue
         ).shape != (2, 2):
-            print("Unable to the 4 corner points of the playfield!")
+            logger.warning("Unable to the 4 corner points of the playfield!")
             return np.array([])
 
         centroids_yellow = np.array(centroids_yellow).reshape(2, 2)
@@ -44,15 +44,15 @@ class PinballUtils:
         self, img, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
     ):
         img = self._gen_utils.apply_color_filter(img, lower_bound, upper_bound)
-        self.append_to_pipeline(img)
+        self._append_to_pipeline(img)
 
         thresh = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         thresh = cv2.GaussianBlur(thresh, (3, 3), 0)
         _, thresh = cv2.threshold(thresh, 0, 255, cv2.THRESH_OTSU)
-        self.append_to_pipeline(thresh)
+        self._append_to_pipeline(thresh)
 
         canny = self._gen_utils.canny(thresh)
-        self.append_to_pipeline(canny)
+        self._append_to_pipeline(canny)
 
         contours, _ = cv2.findContours(
             canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
@@ -61,13 +61,13 @@ class PinballUtils:
 
         contour_img = img.copy()
         cv2.drawContours(contour_img, contours, -1, (255, 0, 0), 3)
-        self.append_to_pipeline(contour_img)
+        self._append_to_pipeline(contour_img)
 
         rects = self._gen_utils.get_contours_of_shape(contours, 4)
 
         rects_img = img.copy()
         cv2.drawContours(rects_img, rects, -1, (255, 0, 0), 3)
-        self.append_to_pipeline(rects_img)
+        self._append_to_pipeline(rects_img)
 
         if len(rects) == 0:
             return rects
@@ -79,15 +79,15 @@ class PinballUtils:
             perimeter = cv2.arcLength(rect, True)
             clean_rects.append(cv2.approxPolyDP(rect, 0.05 * perimeter, True))
 
-        print("clean rects:", clean_rects)
+        logger.debug(f"clean rects: {clean_rects}")
 
         # Get just centers of the rects
         centroids = self._gen_utils.get_contour_centers(clean_rects)
-        print("centroids:", centroids)
+        logger.debug(f"centroids: {centroids}")
 
         return centroids
 
-    def append_to_pipeline(self, img):
+    def _append_to_pipeline(self, img):
         if self.track_pipeline:
             self._display_pipeline.append(img)
 
