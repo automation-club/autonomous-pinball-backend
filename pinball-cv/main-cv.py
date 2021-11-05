@@ -5,9 +5,17 @@ import numpy as np
 import numpy.typing as npt
 import cv2
 
-from utils import *
 import config
 from config import logger  # so that we don't need to say config.logger every time
+
+from utils.general_utils import GeneralUtils
+from utils.display_utils import DisplayUtils
+from utils.pinball_utils import PinballUtils
+
+
+### TODOS:
+# TODO: get rid of prints and replace with logging
+# TODO: add documentation everywhere
 
 
 # create utils
@@ -101,6 +109,8 @@ def main():
             if config.DISPLAY_PIPELINE:
                 # TODO make this clear every time
                 pipeline = pinball_utils.display_pipeline
+                del pinball_utils.display_pipeline
+                logger.debug(f"Pipeline shape: {len(pipeline)}")
                 cv2.imshow(
                     "video pipeline",
                     DisplayUtils.resize_img(
