@@ -108,9 +108,6 @@ def main():
             if config.DISPLAY_PIPELINE:
                 # TODO make this clear every time
                 pipeline = pinball_utils.display_pipeline
-                logger.debug(f"Pipeline shape before clear: {len(pipeline)}")
-                # del pinball_utils.display_pipeline
-                logger.debug(f"Pipeline shape after clear: {len(pipeline)}")
                 cv2.imshow(
                     "video pipeline",
                     DisplayUtils.resize_img(

@@ -30,10 +30,10 @@ VIDEO_CAPTURE_INPUT = str(VIDEO_PATH)
 IMG_PATH, etc. """
 # Colored tapes bounds config
 # Which bounds to look in for each color in HSV format
-LOWER_YELLOW = [15, 100, 200]
-UPPER_YELLOW = [40, 255, 255]
-LOWER_BLUE = [100, 200, 200]
-UPPER_BLUE = [200, 255, 255]
+LOWER_YELLOW = [20, 235, 100]
+UPPER_YELLOW = [30, 255, 200]
+LOWER_BLUE = [0, 0, 0]
+UPPER_BLUE = [255, 255, 255]
 
 # Displaying
 DRAW_OUTPUT = True
