@@ -3,7 +3,9 @@ import cv2
 import numpy as np
 
 from .general_utils import GeneralUtils
-from .config import logger
+from . import logger
+from . import config
+
 
 class PinballUtils:
     def __init__(self, track_pipeline=False):
@@ -20,14 +22,13 @@ class PinballUtils:
         blurred = cv2.GaussianBlur(img, (5, 5), 0)
         self._append_to_pipeline(blurred)
 
-        lower_yellow = [15, 100, 200]
-        upper_yellow = [40, 255, 255]
-        lower_blue = [100, 200, 200]
-        upper_blue = [200, 255, 255]
-
         # for detecting each of the corner tapes
-        centroids_yellow = self.find_corner_rect(blurred, lower_yellow, upper_yellow, 2)
-        centroids_blue = self.find_corner_rect(blurred, lower_blue, upper_blue, 2)
+        centroids_yellow = self.find_corner_rect(
+            blurred, config.LOWER_YELLOW, config.UPPER_YELLOW, 2
+        )
+        centroids_blue = self.find_corner_rect(
+            blurred, config.LOWER_BLUE, config.UPPER_BLUE, 2
+        )
 
         if np.array(centroids_yellow).shape != (2, 2) or np.array(
             centroids_blue
@@ -90,6 +91,9 @@ class PinballUtils:
     def _append_to_pipeline(self, img):
         if self.track_pipeline:
             self._display_pipeline.append(img)
+            logger.debug(
+                f"Appended to display_pipeline. New length: {len(self._display_pipeline)}"
+            )
 
     @property
     def display_pipeline(self):

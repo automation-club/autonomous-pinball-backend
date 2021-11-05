@@ -47,10 +47,10 @@ def main():
         prev_frame = frame
         ret, frame = cap.read()
         frame_count += 1
-        if not ret:
-            logger.error("Failed to read from video capture")
-            # continue
+        if not ret:  # if we fail to read in the frame (likely because we reached end of video)
+            logger.exception("Failed to read from video capture")
             frame = prev_frame
+            # break
 
         # Apply algorithm
 
@@ -60,6 +60,8 @@ def main():
                 playfield_corners.size == 0
                 or frame_count % config.UPDATE_PLAYFIELD_INTERVAL == 0
         ):
+            # Clear the display pipeline so we can see a fresh pipeline
+            del pinball_utils.display_pipeline
             playfield = pinball_utils.get_playfield_corners(frame)
             logger.info(f"Detected playfield corners: {playfield}")
             if playfield.size != 0:
@@ -106,8 +108,9 @@ def main():
             if config.DISPLAY_PIPELINE:
                 # TODO make this clear every time
                 pipeline = pinball_utils.display_pipeline
-                del pinball_utils.display_pipeline
-                logger.debug(f"Pipeline shape: {len(pipeline)}")
+                logger.debug(f"Pipeline shape before clear: {len(pipeline)}")
+                # del pinball_utils.display_pipeline
+                logger.debug(f"Pipeline shape after clear: {len(pipeline)}")
                 cv2.imshow(
                     "video pipeline",
                     DisplayUtils.resize_img(
