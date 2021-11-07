@@ -13,7 +13,7 @@ class PinballUtils:
         self.track_pipeline = track_pipeline
         self._display_pipeline = []
 
-    def get_playfield_corners(self, img):
+    def get_playfield_corners(self, img, user_corners):
         # Saving a copy of the image to return after cropping into the field
         org_img = img.copy()
         self._append_to_pipeline(org_img)
@@ -24,10 +24,10 @@ class PinballUtils:
 
         # for detecting each of the corner tapes
         centroids_yellow = self.find_corner_rect(
-            blurred, config.LOWER_YELLOW, config.UPPER_YELLOW, 2
+            blurred, user_corners, config.LOWER_YELLOW, config.UPPER_YELLOW, 2
         )
         centroids_blue = self.find_corner_rect(
-            blurred, config.LOWER_BLUE, config.UPPER_BLUE, 2
+            blurred, user_corners, config.LOWER_BLUE, config.UPPER_BLUE, 2
         )
 
         if np.array(centroids_yellow).shape != (2, 2) or np.array(
@@ -42,7 +42,7 @@ class PinballUtils:
         return centroids
 
     def find_corner_rect(
-        self, img, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
+        self, img, user_corners, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
     ):
         img = self._gen_utils.apply_color_filter(img, lower_bound, upper_bound)
         self._append_to_pipeline(img)
@@ -73,6 +73,8 @@ class PinballUtils:
         if len(rects) == 0:
             return rects
 
+        rects = self._filter_by_proximity(rects, user_corners, config.USER_PLAYFIELD_CORNERS_RADIUS)
+
         rects = self._gen_utils.get_n_largest_contour(rects, n_rects)
 
         clean_rects = []
@@ -87,6 +89,10 @@ class PinballUtils:
         logger.debug(f"centroids: {centroids}")
 
         return centroids
+
+    def _filter_by_proximity(self, rects, prox_centers, prox_radius):
+        # TODO
+        pass
 
     def _append_to_pipeline(self, img):
         if self.track_pipeline:
@@ -110,3 +116,4 @@ class PinballUtils:
     def display_pipeline(self):
         """Clears the display_pipeline."""
         self._display_pipeline = []
+

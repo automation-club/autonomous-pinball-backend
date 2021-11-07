@@ -28,6 +28,9 @@ VIDEO_CAPTURE_NUMBER = 2
 VIDEO_CAPTURE_INPUT = str(VIDEO_PATH)
 """Any: the actual input to the cv2.VideoCapture function. Can be swapped between VIDEO_CAPTURE_NUMBER, VIDEO_PATH, 
 IMG_PATH, etc. """
+USER_PLAYFIELD_CORNERS_RADIUS = 0.1
+"""float: the radius around the user selected playfield corners to search in for the playfield corners, 
+as a fraction of the entire frame. """
 # Colored tapes bounds config
 # Which bounds to look in for each color in HSV format
 LOWER_YELLOW = [15, 100, 200]

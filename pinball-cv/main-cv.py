@@ -13,17 +13,21 @@ from utils import *
 
 # TODOS:
 # TODO: add documentation everywhere
+# TODO: fix ndarray type hinting everywhere.
+# TODO: fix encapsulation by adding _ where applicable
 
 
 # create utils
 gen_utils = GeneralUtils()
 disp_utils = DisplayUtils()
 pinball_utils = PinballUtils(track_pipeline=config.DISPLAY_PIPELINE)
+user_input_utils = UserInputUtils()
 
 
 def main():
     # houses corners of playfield for unwarpping
     playfield_corners = np.array([])
+    user_playfield_corners = np.array([])
 
     logger.info(f"Opening video capture {config.VIDEO_CAPTURE_INPUT}")
     cap = cv2.VideoCapture(config.VIDEO_CAPTURE_INPUT)
@@ -51,6 +55,11 @@ def main():
             logger.exception("Failed to read from video capture")
             frame = prev_frame
             # break
+
+        # if user has not yet selected playfield corners
+        if user_playfield_corners.size == 0:
+            user_playfield_corners = user_input_utils.get_user_clicks(frame, 4, "Select 4 playfield corners.")
+            logger.info(f"User selected corners (as fractions): {user_playfield_corners}")
 
         # Apply algorithm
 
@@ -106,11 +115,7 @@ def main():
             )
 
             if config.DISPLAY_PIPELINE:
-                # TODO make this clear every time
                 pipeline = pinball_utils.display_pipeline
-                logger.debug(f"Pipeline shape before clear: {len(pipeline)}")
-                # del pinball_utils.display_pipeline
-                logger.debug(f"Pipeline shape after clear: {len(pipeline)}")
                 cv2.imshow(
                     "video pipeline",
                     DisplayUtils.resize_img(
