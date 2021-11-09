@@ -3,7 +3,7 @@ import numpy as np
 
 from numpy.typing import NDArray
 
-# from . import logger
+from . import logger
 
 
 class UserInputUtils:
@@ -48,6 +48,7 @@ class UserInputUtils:
             cv2.imshow(window_name, img)
 
             if cv2.waitKey(1) & 0xFF == 27:
+                # TODO fix this case where exiting before all n points
                 break
 
         # normalize corners to image size
@@ -56,7 +57,7 @@ class UserInputUtils:
         height = img.shape[0]
 
         clicks = np.array(self._user_clicks)
-        print("original corners: ", clicks)
+        logger.debug(f"original corners: {clicks}")
         return clicks / [
             width,
             height,
@@ -70,10 +71,3 @@ class UserInputUtils:
         None
         """
         self._user_clicks = []
-
-
-if __name__ == "__main__":
-    img = np.random.randn(1000, 2000)
-    user_input_utils = UserInputUtils()
-
-    print(user_input_utils.get_user_clicks(img))

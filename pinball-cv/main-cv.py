@@ -32,7 +32,7 @@ def main():
     logger.info(f"Opening video capture {config.VIDEO_CAPTURE_INPUT}")
     cap = cv2.VideoCapture(config.VIDEO_CAPTURE_INPUT)
     if not cap.isOpened():
-        logger.critical(f"Cannot open video capture {config.VIDEO_CAPTURE_INPUT}")
+        logger.critical(f"Cannot open video capture {config.VIDEO_CAPTURE_INPUT}", exc_info=True, stack_info=True)
         exit()
 
     logger.info(
@@ -71,7 +71,7 @@ def main():
         ):
             # Clear the display pipeline so we can see a fresh pipeline
             del pinball_utils.display_pipeline
-            playfield = pinball_utils.get_playfield_corners(frame)
+            playfield = pinball_utils.get_playfield_corners(frame, user_playfield_corners)
             logger.info(f"Detected playfield corners: {playfield}")
             if playfield.size != 0:
                 playfield_corners = playfield
