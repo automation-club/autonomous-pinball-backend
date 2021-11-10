@@ -13,7 +13,7 @@ class PinballUtils:
         self.track_pipeline = track_pipeline
         self._display_pipeline = []
 
-    def get_playfield_corners(self, img):
+    def get_playfield_corners(self, img, user_corners):
         # Saving a copy of the image to return after cropping into the field
         org_img = img.copy()
         self._append_to_pipeline(org_img)
@@ -24,10 +24,10 @@ class PinballUtils:
 
         # for detecting each of the corner tapes
         centroids_yellow = self.find_corner_rect(
-            blurred, config.LOWER_YELLOW, config.UPPER_YELLOW, 2
+            blurred, user_corners, config.LOWER_YELLOW, config.UPPER_YELLOW, 2
         )
         centroids_blue = self.find_corner_rect(
-            blurred, config.LOWER_BLUE, config.UPPER_BLUE, 2
+            blurred, user_corners, config.LOWER_BLUE, config.UPPER_BLUE, 2
         )
 
         if np.array(centroids_yellow).shape != (2, 2) or np.array(
@@ -42,8 +42,10 @@ class PinballUtils:
         return centroids
 
     def find_corner_rect(
-        self, img, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
+        self, img, user_corners, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
     ):
+        img = self._filter_by_proximity(img, user_corners, config.USER_PLAYFIELD_CORNERS_RADIUS)
+
         img = self._gen_utils.apply_color_filter(img, lower_bound, upper_bound)
         self._append_to_pipeline(img)
 
@@ -88,6 +90,16 @@ class PinballUtils:
 
         return centroids
 
+    def _filter_by_proximity(self, img, centers, radius_norm):
+        radius = radius_norm *  # TODO fix this so that it is unnormaized
+        # TODO confirm this works
+        mask = np.array([])
+
+        for (x, y) in centers:
+            mask += self._gen_utils.circular_roi_mask(img, x, y, radius)
+
+        return cv2.bitwise_and(img, img, mask=mask)
+
     def _append_to_pipeline(self, img):
         if self.track_pipeline:
             self._display_pipeline.append(img)
@@ -110,3 +122,4 @@ class PinballUtils:
     def display_pipeline(self):
         """Clears the display_pipeline."""
         self._display_pipeline = []
+

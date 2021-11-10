@@ -13,22 +13,26 @@ from utils import *
 
 # TODOS:
 # TODO: add documentation everywhere
+# TODO: fix ndarray type hinting everywhere.
+# TODO: fix encapsulation by adding _ where applicable
 
 
 # create utils
 gen_utils = GeneralUtils()
 disp_utils = DisplayUtils()
 pinball_utils = PinballUtils(track_pipeline=config.DISPLAY_PIPELINE)
+user_input_utils = UserInputUtils()
 
 
 def main():
     # houses corners of playfield for unwarpping
     playfield_corners = np.array([])
+    user_playfield_corners = np.array([])
 
     logger.info(f"Opening video capture {config.VIDEO_CAPTURE_INPUT}")
     cap = cv2.VideoCapture(config.VIDEO_CAPTURE_INPUT)
     if not cap.isOpened():
-        logger.critical(f"Cannot open video capture {config.VIDEO_CAPTURE_INPUT}")
+        logger.critical(f"Cannot open video capture {config.VIDEO_CAPTURE_INPUT}", exc_info=True, stack_info=True)
         exit()
 
     logger.info(
@@ -52,6 +56,11 @@ def main():
             frame = prev_frame
             # break
 
+        # if user has not yet selected playfield corners
+        if user_playfield_corners.size == 0:
+            user_playfield_corners = user_input_utils.get_user_clicks(frame, 4, "Select 4 playfield corners.")
+            logger.info(f"User selected corners (as fractions): {user_playfield_corners}")
+
         # Apply algorithm
 
         # If there is no playfield detected, find it
@@ -62,7 +71,7 @@ def main():
         ):
             # Clear the display pipeline so we can see a fresh pipeline
             del pinball_utils.display_pipeline
-            playfield = pinball_utils.get_playfield_corners(frame)
+            playfield = pinball_utils.get_playfield_corners(frame, user_playfield_corners)
             logger.info(f"Detected playfield corners: {playfield}")
             if playfield.size != 0:
                 playfield_corners = playfield
@@ -106,7 +115,6 @@ def main():
             )
 
             if config.DISPLAY_PIPELINE:
-                # TODO make this clear every time
                 pipeline = pinball_utils.display_pipeline
                 cv2.imshow(
                     "video pipeline",

@@ -108,6 +108,29 @@ class GeneralUtils:
         trans_mat = cv2.getPerspectiveTransform(rect_points, corner_points)
         return cv2.warpPerspective(img, trans_mat, (img.shape[1], img.shape[0]))
 
+
+    @classmethod
+    def circular_roi_mask(cls, img, x, y, radius):
+        height, width = img.shape[:2]
+        # Confirm x,y coordinate is inside image
+        assert 0 <= x < width
+        assert 0 <= y < height
+
+        # first get rectangular roi contain the circle
+        # x, y is in the center of the rectangle (square)
+        # x1 = x - radius
+        # x2 = x + radius
+        # y1 = y - radius
+        # y2 = y + radius
+        # rect = img[y1:y2, x1:x2, :]
+
+        # create a mask of same size as rect
+        mask = np.zeros(img.shape[:2], dtype=img.dtype)
+        cv2.circle(mask, (x, y), radius, 255, -1)
+
+        return mask
+
+
     @classmethod
     def get_contour_centers(cls, contours):
         centeriods = []
@@ -274,20 +297,15 @@ class GeneralUtils:
 
 def main():
     """Run simple tests to see if the processing of the image using these utils works."""
-    pinball_util = PinballUtils()
+    general_utils = GeneralUtils()
     img = cv2.imread("./datasets/pinball-tape-img-redo.jpg")
-    playfield = pinball_util.get_playfield_corners(img).astype(np.uint8)
-    cv2.imshow("playfield", playfield)
 
-    pipeline = pinball_utils.display_pipeline
-    DisplayUtils.display_img(
-        DisplayUtils.create_img_grid_list(
-            pipeline,
-            len(pipeline) // 2,
-            len(pipeline) // (len(pipeline) // 2),
-            ),
-        resolution_scale=0.25,
-    ),
+    mask = general_utils.circular_roi_mask(img, img.shape[1] // 2, img.shape[0] // 2, 150)
+
+    new_img = cv2.bitwise_and(img, img, mask=mask)
+    cv2.imshow("img", img)
+    cv2.imshow("mask", mask)
+    cv2.imshow("new", new_img)
 
     cv2.waitKey(-1)
 
