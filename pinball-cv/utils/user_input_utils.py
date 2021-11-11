@@ -51,6 +51,7 @@ class UserInputUtils:
                 # TODO fix this case where exiting before all n points
                 break
 
+        cv2.destroyWindow(window_name)
         # normalize corners to image size
         # first number in image shape is the number of rows, second is the number of columns
         width = img.shape[1]

@@ -2,7 +2,6 @@
 from pathlib import Path
 import logging
 
-
 # Logging
 FILE_LOG_LEVEL = logging.WARNING
 STREAM_LOG_LEVEL = logging.DEBUG
@@ -28,9 +27,10 @@ VIDEO_CAPTURE_NUMBER = 2
 VIDEO_CAPTURE_INPUT = str(VIDEO_PATH)
 """Any: the actual input to the cv2.VideoCapture function. Can be swapped between VIDEO_CAPTURE_NUMBER, VIDEO_PATH, 
 IMG_PATH, etc. """
-USER_PLAYFIELD_CORNERS_RADIUS = 0.1
+USER_PLAYFIELD_CORNERS_RADIUS = 0.05
 """float: the radius around the user selected playfield corners to search in for the playfield corners, 
-as a fraction of the entire frame. """
+as a fraction of the entire frame. It is unitless in 1D, so to convert to a pixel value:
+:math:`r \sqrt{width \cdot height}`"""
 # Colored tapes bounds config
 # Which bounds to look in for each color in HSV format
 LOWER_YELLOW = [20, 235, 100]
