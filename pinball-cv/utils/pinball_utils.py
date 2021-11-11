@@ -90,15 +90,26 @@ class PinballUtils:
 
         return centroids
 
-    def _filter_by_proximity(self, img, centers, radius_norm):
-        radius = radius_norm *  # TODO fix this so that it is unnormaized
+    def _filter_by_proximity(self, img, centers_norm, radius_norm):
+        # norm radius is a fraction of total size so it needs to be converted to pixel size
+        radius = radius_norm * np.sqrt(img.shape[1] * img.shape[0])
+        radius = int(radius)
+        # TODO this doesn't seem to work
+        centers = centers_norm * np.array([img.shape[1], img.shape[0]])
+        centers = centers.astype(np.uint64)
+
+        logger.debug(f"Image shape in prox filter: {img.shape}")
+        logger.debug(f"Normalized radius: {radius_norm}. Radius: {radius}")
+        logger.debug(f"Normalized centers: {centers_norm}. Centers: {centers}")
+
         # TODO confirm this works
-        mask = np.array([])
+        mask = np.zeros(img.shape[:2], dtype=np.uint8)
 
         for (x, y) in centers:
             mask += self._gen_utils.circular_roi_mask(img, x, y, radius)
 
-        return cv2.bitwise_and(img, img, mask=mask)
+        masked = cv2.bitwise_and(img, img, mask=mask)
+        return masked
 
     def _append_to_pipeline(self, img):
         if self.track_pipeline:
