@@ -22,9 +22,9 @@ IMG_PATH = DATASET_PATH / "pinball-tape-img-redo.jpg"
 # Functional
 UPDATE_PLAYFIELD_INTERVAL = 60
 """int: number of frames per update of corners of playfield."""
-VIDEO_CAPTURE_NUMBER = 2
+VIDEO_CAPTURE_NUMBER =
 """int: the capture camera number to try to read from."""
-VIDEO_CAPTURE_INPUT = str(VIDEO_PATH)
+VIDEO_CAPTURE_INPUT = VIDEO_CAPTURE_NUMBER
 """Any: the actual input to the cv2.VideoCapture function. Can be swapped between VIDEO_CAPTURE_NUMBER, VIDEO_PATH, 
 IMG_PATH, etc. """
 USER_PLAYFIELD_CORNERS_RADIUS = 0.05
