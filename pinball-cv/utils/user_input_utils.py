@@ -3,7 +3,6 @@ import numpy as np
 
 from numpy.typing import NDArray
 
-from . import logger
 
 
 class UserInputUtils:
@@ -58,7 +57,6 @@ class UserInputUtils:
         height = img.shape[0]
 
         clicks = np.array(self._user_clicks)
-        logger.debug(f"original corners: {clicks}")
         return clicks / [
             width,
             height,

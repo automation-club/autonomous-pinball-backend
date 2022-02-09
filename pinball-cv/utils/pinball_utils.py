@@ -1,9 +1,10 @@
 """Houses pinball image utilities in class PinballUtils"""
+from curses.panel import bottom_panel, top_panel
 import cv2
 import numpy as np
 
+from .display_utils import DisplayUtils
 from .general_utils import GeneralUtils
-from . import logger
 from . import config
 
 
@@ -13,34 +14,18 @@ class PinballUtils:
         self.track_pipeline = track_pipeline
         self._display_pipeline = []
 
-    def get_playfield_corners(self, img, user_corners):
-        # Saving a copy of the image to return after cropping into the field
-        org_img = img.copy()
-        self._append_to_pipeline(org_img)
+    def get_playfield_corners(frame):
+        corner_coordinates = []
 
-        cv2.normalize(img, img, 0, 255, cv2.NORM_MINMAX)
-        blurred = cv2.GaussianBlur(img, (5, 5), 0)
-        self._append_to_pipeline(blurred)
+        # Change to HSV colorspace for color thresholding
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        # for detecting each of the corner tapes
-        centroids_yellow = self.find_corner_rect(
-            blurred, user_corners, config.LOWER_YELLOW, config.UPPER_YELLOW, 2
-        )
-        centroids_blue = self.find_corner_rect(
-            blurred, user_corners, config.LOWER_BLUE, config.UPPER_BLUE, 2
-        )
-
-        if np.array(centroids_yellow).shape != (2, 2) or np.array(
-            centroids_blue
-        ).shape != (2, 2):
-            logger.warning("Unable to the 4 corner points of the playfield!")
-            return np.array([])
-
-        centroids_yellow = np.array(centroids_yellow).reshape(2, 2)
-        centroids_blue = np.array(centroids_blue).reshape(2, 2)
-        centroids = np.append(centroids_yellow, centroids_blue, axis=0)
-        return centroids
-
+        # Split frame into two parts to analyze different colors and reduce noise
+        [top, bottom] = np.split(hsv, 2)
+        DisplayUtils.display_frame(top)
+        
+        return corner_coordinates
+        
     def find_corner_rect(
         self, img, user_corners, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
     ):
@@ -82,11 +67,9 @@ class PinballUtils:
             perimeter = cv2.arcLength(rect, True)
             clean_rects.append(cv2.approxPolyDP(rect, 0.05 * perimeter, True))
 
-        logger.debug(f"clean rects: {clean_rects}")
 
         # Get just centers of the rects
         centroids = self._gen_utils.get_contour_centers(clean_rects)
-        logger.debug(f"centroids: {centroids}")
 
         return centroids
 
@@ -98,9 +81,6 @@ class PinballUtils:
         centers = centers_norm * np.array([img.shape[1], img.shape[0]])
         centers = centers.astype(np.uint64)
 
-        logger.debug(f"Image shape in prox filter: {img.shape}")
-        logger.debug(f"Normalized radius: {radius_norm}. Radius: {radius}")
-        logger.debug(f"Normalized centers: {centers_norm}. Centers: {centers}")
 
         # TODO confirm this works
         mask = np.zeros(img.shape[:2], dtype=np.uint8)
@@ -114,9 +94,6 @@ class PinballUtils:
     def _append_to_pipeline(self, img):
         if self.track_pipeline:
             self._display_pipeline.append(img)
-            logger.debug(
-                f"Appended to display_pipeline. New length: {len(self._display_pipeline)}"
-            )
 
     @property
     def display_pipeline(self):
