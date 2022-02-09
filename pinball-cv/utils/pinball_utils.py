@@ -17,15 +17,42 @@ class PinballUtils:
     def get_playfield_corners(frame):
         corner_coordinates = []
 
+        frame = cv2.GaussianBlur(frame, (3, 3), 0)
         # Change to HSV colorspace for color thresholding
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # Split frame into two parts to analyze different colors and reduce noise
-        [top, bottom] = np.split(hsv, 2)
-        DisplayUtils.display_frame(top)
+        [top, bottom] = np.split(hsv, 2, axis=0)
+        print(top.shape)    
+        print(bottom.shape)
+
+        # Color threshold masks (top of playfield has yellow corner markers and bottom of playfield has blue corner markers)
+        yellow_mask = cv2.inRange(top, np.array(config.LOWER_YELLOW), np.array(config.UPPER_YELLOW))
+        blue_mask = cv2.inRange(bottom, np.array(config.LOWER_BLUE), np.array(config.UPPER_BLUE))
+        # Combining masks to retrieve full frame mask
+        mask = np.vstack((yellow_mask, blue_mask))
+
+        # Extract targetted colors from original frame in grayscale
+        extracted_colors = cv2.bitwise_and(frame,frame, mask=mask)
+        extracted_colors_gray = cv2.cvtColor(extracted_colors, cv2.COLOR_BGR2GRAY)
+        extracted_colors_gray = cv2.threshold(extracted_colors_gray, config.CORNERS_BINARY_THRESHOLD_MIN, config.CORNERS_BINARY_THRESHOLD_MAX, cv2.THRESH_BINARY)[1]
+        # extracted_colors_gray = cv2.erode(extracted_colors_gray, None, iterations=1)
+        # extracted_colors_gray = cv2.dilate(extracted_colors_gray, None, iterations=1)
+
+        # Find contours in the image
+        contours, _ = cv2.findContours(extracted_colors_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for c in contours:
+            area = cv2.contourArea(c)
+            perim = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, config.CONTOUR_APPROXIMATION_COEFFICIENT * perim, True)
+            if config.CORNER_CONTOUR_AREA_MIN < area < config.CORNER_CONTOUR_AREA_MAX and len(approx) == 4:
+                corner_coordinates.append(c)
+                cv2.drawContours(frame, [c], -1, (0, 255, 0), 3)
         
+        DisplayUtils.display_frame(frame, wait_key=1)
+
         return corner_coordinates
-        
+
     def find_corner_rect(
         self, img, user_corners, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
     ):

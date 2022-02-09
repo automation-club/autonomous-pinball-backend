@@ -16,9 +16,27 @@ VIDEO_CAPTURE_NUMBER = None
 VIDEO_CAPTURE_INPUT = str(VIDEO_PATH)
 """Any: the actual input to the cv2.VideoCapture function. Can be swapped between VIDEO_CAPTURE_NUMBER, VIDEO_PATH, 
 IMG_PATH, etc. """
+
+
+
+# Playfield Corner Detection Tunable Paramaeters
+GAUSSIAN_BLUR_KERNEL_SIZE = (5, 5)
+"""Tuple[int, int]: kernel size of the Gaussian Blur."""
+CONTOUR_APPROXIMATION_COEFFICIENT = 0.1
+"""float: coefficient of epsilon in polygon approximation of the contour."""
+CORNERS_BINARY_THRESHOLD_MIN = 20
+"""int: minimum threshold for the binary thresholding of the playfield corners."""
+CORNERS_BINARY_THRESHOLD_MAX = 255
+"""int: maximum threshold for the binary thresholding of the playfield corners."""
+CORNER_CONTOUR_AREA_MIN = 30
+"""int: minimum area of the contour of the playfield corners."""
+CORNER_CONTOUR_AREA_MAX = 250
+"""int: maximum area of the contour of the playfield corners."""
+
 # HSV color mapping intervals to find pinball playfield corners
-LOWER_YELLOW = [20, 235, 100]
-UPPER_YELLOW = [30, 255, 200]
-LOWER_BLUE = [0, 0, 0]
-UPPER_BLUE = [255, 255, 255]
+LOWER_YELLOW = [20, 130, 130]
+UPPER_YELLOW = [30, 255, 255]
+LOWER_BLUE = [100, 140, 20]
+UPPER_BLUE = [130, 255, 255]
+
 
