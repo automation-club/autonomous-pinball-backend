@@ -27,7 +27,7 @@ def main():
     while True:
         ok, curr_frame = cap.read()
 
-        DisplayUtils.display_frame(curr_frame)
+        # DisplayUtils.display_frame(curr_frame)
 
         # Rotate frame
         rotated_frame = DisplayUtils.rotate_frame_counterclockwise(frame=curr_frame)
@@ -38,8 +38,6 @@ def main():
             PinballUtils.get_playfield_corners(rotated_frame)
             # playfield_corners = 
 
-        if cv2.waitKey(0) & 0xff == ord("q"):
-            break
     # Release the capture at end
     cap.release()
     cv2.destroyAllWindows()
