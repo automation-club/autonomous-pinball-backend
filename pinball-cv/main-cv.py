@@ -1,7 +1,6 @@
 import time
-
-import numpy as np
 import cv2
+import numpy as np
 
 from utils import *
 
@@ -49,6 +48,9 @@ def main():
             warped_frame = rotated_frame
 
         # Pinball detection
+        if runs == 0:
+            print(f"Looking for {config.PINBALL_COLOR} pinball")
+        pinball_coordinates = PinballUtils.get_pinball_coordinates(warped_frame)
         # TODO: pinball detection
 
         new_time = time.time()

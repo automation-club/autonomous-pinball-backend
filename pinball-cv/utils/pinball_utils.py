@@ -1,5 +1,4 @@
 """Houses pinball image utilities in class PinballUtils"""
-from curses.panel import bottom_panel, top_panel
 import cv2
 import numpy as np
 
@@ -31,9 +30,9 @@ class PinballUtils:
 
         corner_coordinates = []
 
-        frame = cv2.GaussianBlur(frame, (3, 3), 0)
+        blurred_frame = cv2.GaussianBlur(frame, config.GAUSSIAN_BLUR_KERNEL_SIZE, 0)
         # Change to HSV colorspace for color thresholding
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
 
         # Split frame into two parts to analyze different colors and reduce noise
         [top, bottom] = np.split(hsv, 2, axis=0)
@@ -46,7 +45,7 @@ class PinballUtils:
         mask = np.vstack((yellow_mask, blue_mask))
 
         # Extract targeted colors from original frame in grayscale
-        extracted_colors = cv2.bitwise_and(frame, frame, mask=mask)
+        extracted_colors = cv2.bitwise_and(blurred_frame, blurred_frame, mask=mask)
         extracted_colors_gray = cv2.cvtColor(extracted_colors, cv2.COLOR_BGR2GRAY)
 
         # Find contours in the image
@@ -120,6 +119,40 @@ class PinballUtils:
         sorted_coords[3] = coords[np.argmax(diff)]  # Bottom left corner
 
         return sorted_coords
+
+    @staticmethod
+    def get_pinball_coordinates(frame):
+        """
+        Identifies the coordinates of the pinball in the frame.
+
+        Parameters
+        ----------
+        frame : np.ndarray
+            The frame to analyze.
+
+        Returns
+        -------
+        list
+            The coordinates of the pinball.
+        """
+
+        blurred_frame = cv2.GaussianBlur(frame, config.GAUSSIAN_BLUR_KERNEL_SIZE, 0)
+        hsv = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
+        extracted_color_binary = cv2.inRange(hsv, np.array(config.PINBALL_LOWER_COLOR), np.array(config.PINBALL_UPPER_COLOR))
+        # extracted_color = cv2.bitwise_and(blurred_frame, blurred_frame, mask=extracted_color_binary)
+        # extracted_color_gray = cv2.cvtColor(extracted_color, cv2.COLOR_BGR2GRAY)
+        extracted_color_binary = cv2.erode(extracted_color_binary, None, iterations=8)
+        extracted_color_binary = cv2.dilate(extracted_color_binary, None, iterations=8)
+
+        # Find contours in the image
+        contours = cv2.findContours(extracted_color_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        extracted_color_binary = cv2.cvtColor(extracted_color_binary, cv2.COLOR_GRAY2BGR)
+        for c in contours[0]:
+            c = cv2.convexHull(c)
+            area = cv2.contourArea(c)
+            if 600 < area < 2000:
+                cv2.drawContours(extracted_color_binary, [c], -1, (0, 0, 255), 2)
+        DisplayUtils.display_frame(extracted_color_binary, "extracted_color_binary")
 
     def find_corner_rect(
             self, img, user_corners, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
