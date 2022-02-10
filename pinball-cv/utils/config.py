@@ -3,7 +3,7 @@ from pathlib import Path
 
 # Datasets
 # Resolve changes symlinks to absolute path
-DATASET_DIRECTORY_PATH = Path("./datasets/").resolve()
+DATASET_DIRECTORY_PATH = Path("../datasets/").resolve()
 """Path: path to any datasets."""
 VIDEO_PATH: Path = (DATASET_DIRECTORY_PATH / "green.mp4").resolve()
 """Path: path to any test videos."""

@@ -1,10 +1,7 @@
-
 import numpy as np
 import cv2
-from torch import frac
 
 from utils import *
-
 
 # TODOS:
 # TODO: add documentation everywhere
@@ -19,24 +16,41 @@ user_input_utils = UserInputUtils()
 
 
 def main():
-    
     cap = cv2.VideoCapture(config.VIDEO_CAPTURE_INPUT)
     print("Video capture initialized")
 
     runs = 0
     while True:
         ok, curr_frame = cap.read()
-
-        # DisplayUtils.display_frame(curr_frame)
+        if not ok:
+            print("Error reading frame")
+            break
 
         # Rotate frame
         rotated_frame = DisplayUtils.rotate_frame_counterclockwise(frame=curr_frame)
-        # DisplayUtils.display_frame(rotated_frame)
-        
-        if runs % 20 == 0:
-            print("Recalculating Playfield Corners")
-            PinballUtils.get_playfield_corners(rotated_frame)
-            # playfield_corners = 
+
+        # Recalculate playfield corner coordinates every 30 frames
+        if runs % 30 == 0:
+            playfield_corners_temp = PinballUtils.get_playfield_corners(rotated_frame)
+            if len(playfield_corners_temp) == 4:
+                print("Playfield corners found")
+                playfield_corners = playfield_corners_temp
+
+        # Warp frame to playfield
+        try:
+            warped_frame = PinballUtils.warp_frame(rotated_frame, playfield_corners)
+        except NameError:
+            # TODO: find better solution if playfield corners are not found yet
+            warped_frame = rotated_frame
+
+        # Pinball detection
+        # TODO: pinball detection
+
+        DisplayUtils.display_frame(warped_frame)
+        # Break out of loop if Q key is pressed
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            print("Stop program key pressed")
+            break
 
     # Release the capture at end
     cap.release()

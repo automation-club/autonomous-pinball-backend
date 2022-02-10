@@ -14,7 +14,21 @@ class PinballUtils:
         self.track_pipeline = track_pipeline
         self._display_pipeline = []
 
+    @staticmethod
     def get_playfield_corners(frame):
+        """Identifies coordinates of the playfield corners from the frame.
+
+        Parameters
+        ----------
+        frame : numpy.ndarray
+            The frame read in by the VideoCapture
+
+        Returns
+        -------
+        corners_coordinates : list
+            List of coordinates of the identified playfield corners
+        """
+
         corner_coordinates = []
 
         frame = cv2.GaussianBlur(frame, (3, 3), 0)
@@ -23,21 +37,17 @@ class PinballUtils:
 
         # Split frame into two parts to analyze different colors and reduce noise
         [top, bottom] = np.split(hsv, 2, axis=0)
-        print(top.shape)    
-        print(bottom.shape)
 
-        # Color threshold masks (top of playfield has yellow corner markers and bottom of playfield has blue corner markers)
+        # Color threshold masks (top of playfield has yellow corner markers and bottom of playfield has blue corner
+        # markers)
         yellow_mask = cv2.inRange(top, np.array(config.LOWER_YELLOW), np.array(config.UPPER_YELLOW))
         blue_mask = cv2.inRange(bottom, np.array(config.LOWER_BLUE), np.array(config.UPPER_BLUE))
         # Combining masks to retrieve full frame mask
         mask = np.vstack((yellow_mask, blue_mask))
 
-        # Extract targetted colors from original frame in grayscale
-        extracted_colors = cv2.bitwise_and(frame,frame, mask=mask)
+        # Extract targeted colors from original frame in grayscale
+        extracted_colors = cv2.bitwise_and(frame, frame, mask=mask)
         extracted_colors_gray = cv2.cvtColor(extracted_colors, cv2.COLOR_BGR2GRAY)
-        extracted_colors_gray = cv2.threshold(extracted_colors_gray, config.CORNERS_BINARY_THRESHOLD_MIN, config.CORNERS_BINARY_THRESHOLD_MAX, cv2.THRESH_BINARY)[1]
-        # extracted_colors_gray = cv2.erode(extracted_colors_gray, None, iterations=1)
-        # extracted_colors_gray = cv2.dilate(extracted_colors_gray, None, iterations=1)
 
         # Find contours in the image
         contours, _ = cv2.findContours(extracted_colors_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -46,15 +56,73 @@ class PinballUtils:
             perim = cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, config.CONTOUR_APPROXIMATION_COEFFICIENT * perim, True)
             if config.CORNER_CONTOUR_AREA_MIN < area < config.CORNER_CONTOUR_AREA_MAX and len(approx) == 4:
-                corner_coordinates.append(c)
-                cv2.drawContours(frame, [c], -1, (0, 255, 0), 3)
-        
-        DisplayUtils.display_frame(frame, wait_key=1)
+                m = cv2.moments(c)
+                x = int(m["m10"] / m["m00"])
+                y = int(m["m01"] / m["m00"])
+                corner_coordinates.append([x, y])
 
         return corner_coordinates
 
+    @staticmethod
+    def warp_frame(frame, playfield_corners):
+        """
+        Warps the frame to the playfield.
+
+        Parameters
+        ----------
+        frame : np.ndarray
+            The frame to transform.
+        playfield_corners : list
+            The coordinates of the corners of the playfield.
+
+        Returns
+        -------
+        np.ndarray
+            The warped frame.
+        """
+        playfield_corners_sorted = PinballUtils.sort_coordinates(playfield_corners)
+        display_corners_sorted = PinballUtils.sort_coordinates([
+            [0, 0],
+            [frame.shape[1], 0],
+            [frame.shape[1], frame.shape[0]],
+            [0, frame.shape[0]]
+        ])
+
+        # Calculate transformation matrix
+        transformation_matrix = cv2.getPerspectiveTransform(playfield_corners_sorted, display_corners_sorted)
+
+        return cv2.warpPerspective(frame, transformation_matrix, (frame.shape[1], frame.shape[0]))
+
+    @staticmethod
+    def sort_coordinates(coordinates):
+        """
+        Sorts the coordinates of the playfield corners.
+
+        Parameters
+        ----------
+        coordinates : list
+            The coordinates of the corners of the playfield.
+
+        Returns
+        -------
+        np.ndarray
+            The coordinates of the corners of the playfield, sorted.
+        """
+
+        coords = np.array(coordinates, dtype=np.float32)
+        sorted_coords = np.zeros(coords.shape, dtype=np.float32)
+
+        s = np.sum(coords, axis=1)
+        sorted_coords[0] = coords[np.argmax(s)]  # Top left corner
+        sorted_coords[2] = coords[np.argmin(s)]  # Bottom right corner
+        diff = np.diff(coords, axis=1)
+        sorted_coords[1] = coords[np.argmin(diff)]  # Top right corner
+        sorted_coords[3] = coords[np.argmax(diff)]  # Bottom left corner
+
+        return sorted_coords
+
     def find_corner_rect(
-        self, img, user_corners, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
+            self, img, user_corners, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
     ):
         img = self._filter_by_proximity(img, user_corners, config.USER_PLAYFIELD_CORNERS_RADIUS)
 
@@ -94,7 +162,6 @@ class PinballUtils:
             perimeter = cv2.arcLength(rect, True)
             clean_rects.append(cv2.approxPolyDP(rect, 0.05 * perimeter, True))
 
-
         # Get just centers of the rects
         centroids = self._gen_utils.get_contour_centers(clean_rects)
 
@@ -107,7 +174,6 @@ class PinballUtils:
         # TODO this doesn't seem to work
         centers = centers_norm * np.array([img.shape[1], img.shape[0]])
         centers = centers.astype(np.uint64)
-
 
         # TODO confirm this works
         mask = np.zeros(img.shape[:2], dtype=np.uint8)
@@ -137,4 +203,3 @@ class PinballUtils:
     def display_pipeline(self):
         """Clears the display_pipeline."""
         self._display_pipeline = []
-
