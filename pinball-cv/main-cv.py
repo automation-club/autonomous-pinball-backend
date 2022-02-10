@@ -24,6 +24,7 @@ def main():
     new_time = 0
     fond = cv2.FONT_HERSHEY_DUPLEX
     playfield_corners = None
+    prev_frame = None
     runs = 0
     while True:
         ok, curr_frame = cap.read()
@@ -50,14 +51,18 @@ def main():
         # Pinball detection
         if runs == 0:
             print(f"Looking for {config.PINBALL_COLOR} pinball")
-        pinball_coordinates = PinballUtils.get_pinball_coordinates(warped_frame)
+        pinball_coordinates = PinballUtils.get_pinball_coordinates(warped_frame, prev_frame)
+        # Draw pinball coordinates
+        if len(pinball_coordinates) == 1:
+            DisplayUtils.draw_circles(warped_frame, pinball_coordinates, radius=8)
         # TODO: pinball detection
 
         new_time = time.time()
         fps = f"FPS: {int(1 / (new_time - prev_time))}"
         cv2.putText(warped_frame, fps, (10, 30), fond, 1, (255, 255, 255), 2, cv2.LINE_AA)
         prev_time = new_time
-        DisplayUtils.display_frame(warped_frame)
+        prev_frame = rotated_frame
+        DisplayUtils.display_frame(warped_frame, "Warped")
         # Break out of loop if Q key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
             print("Stop program key pressed")

@@ -42,8 +42,8 @@ CORNER_UPPER_BLUE = [130, 255, 255]
 """List[int]: upper bound of the blue color range."""
 
 # HSV color mapping intervals for different pinball colors
-BALL_LOWER_GREEN = [40, 50, 50]
-BALL_UPPER_GREEN = [70, 255, 255]
+BALL_LOWER_GREEN = [40, 0, 80]
+BALL_UPPER_GREEN = [60, 255, 255]
 BALL_LOWER_ORANGE = [10, 130, 130]
 BALL_UPPER_ORANGE = [25, 255, 255]
 BALL_LOWER_BLUE = [0,0,0]

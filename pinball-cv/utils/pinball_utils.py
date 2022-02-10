@@ -121,7 +121,7 @@ class PinballUtils:
         return sorted_coords
 
     @staticmethod
-    def get_pinball_coordinates(frame):
+    def get_pinball_coordinates(frame, prev_frame):
         """
         Identifies the coordinates of the pinball in the frame.
 
@@ -132,27 +132,44 @@ class PinballUtils:
 
         Returns
         -------
-        list
+        pinball_coordinates : list
             The coordinates of the pinball.
         """
 
+        pinball_coordinates = []
+
         blurred_frame = cv2.GaussianBlur(frame, config.GAUSSIAN_BLUR_KERNEL_SIZE, 0)
         hsv = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
-        extracted_color_binary = cv2.inRange(hsv, np.array(config.PINBALL_LOWER_COLOR), np.array(config.PINBALL_UPPER_COLOR))
-        # extracted_color = cv2.bitwise_and(blurred_frame, blurred_frame, mask=extracted_color_binary)
-        # extracted_color_gray = cv2.cvtColor(extracted_color, cv2.COLOR_BGR2GRAY)
-        extracted_color_binary = cv2.erode(extracted_color_binary, None, iterations=8)
-        extracted_color_binary = cv2.dilate(extracted_color_binary, None, iterations=8)
+        extracted_color_binary = cv2.inRange(hsv, np.array(config.PINBALL_LOWER_COLOR),
+                                             np.array(config.PINBALL_UPPER_COLOR))
+
+        # extracted_color_binary = cv2.erode(extracted_color_binary, None, iterations=2)
+        # extracted_color_binary = cv2.dilate(extracted_color_binary, None, iterations=2)
 
         # Find contours in the image
+        # extracted_color_binary = cv2.cvtColor(extracted_color_binary, cv2.COLOR_GRAY2BGR)
+
+        # bilateral_filtered = cv2.bilateralFilter(extracted_color_binary, 1, 50, 50)
+        # edge_detected = cv2.Canny(extracted_color_binary, 75, 200)
         contours = cv2.findContours(extracted_color_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         extracted_color_binary = cv2.cvtColor(extracted_color_binary, cv2.COLOR_GRAY2BGR)
+        # DisplayUtils.display_frame(edge_detected)
+        # edge_detected = cv2.cvtColor(edge_detected, cv2.COLOR_GRAY2BGR)
         for c in contours[0]:
-            c = cv2.convexHull(c)
+            # c = cv2.convexHull(c)
             area = cv2.contourArea(c)
-            if 600 < area < 2000:
-                cv2.drawContours(extracted_color_binary, [c], -1, (0, 0, 255), 2)
-        DisplayUtils.display_frame(extracted_color_binary, "extracted_color_binary")
+            perim = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.01 * perim, True)
+            if 600 < area < 2000 and perim < 160 and len(approx) < 15:
+                m = cv2.moments(c)
+                x = int(m['m10'] / m['m00'])
+                y = int(m['m01'] / m['m00'])
+                pinball_coordinates.append([x, y])
+
+                # cv2.drawContours(extracted_color_binary, [c], -1, (0, 0, 255), 2)
+
+        # DisplayUtils.display_frame(extracted_color_binary)
+        return pinball_coordinates
 
     def find_corner_rect(
             self, img, user_corners, lower_bound, upper_bound, n_rects, rect_contour_thresh=0
