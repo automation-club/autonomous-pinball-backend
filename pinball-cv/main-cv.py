@@ -52,6 +52,7 @@ def main():
         if runs == 0:
             print(f"Looking for {config.PINBALL_COLOR} pinball")
         pinball_coordinates = PinballUtils.get_pinball_coordinates(warped_frame, prev_frame)
+
         # Draw pinball coordinates
         if len(pinball_coordinates) == 1:
             DisplayUtils.draw_circles(warped_frame, pinball_coordinates, radius=8)
