@@ -5,6 +5,7 @@
 # Ignore comptuer specific IDE configs
 **/.idea/workspace.xml
 **/.idea/tasks.xml
+.idea/
 
 
 # Byte-compiled / optimized / DLL files
