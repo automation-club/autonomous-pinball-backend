@@ -23,7 +23,7 @@ class DisplayUtils:
     def display_frame(frame, window_name="test", wait_key=0):
         frame = cv2.resize(frame, (0, 0), fx=0.75, fy=0.75)
         cv2.imshow(window_name, frame)
-        cv2.waitKey(wait_key)
+        # cv2.waitKey(wait_key)
 
     @classmethod
     def detect_draw_contours(cls, src, dest=None):
