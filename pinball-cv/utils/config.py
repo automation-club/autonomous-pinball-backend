@@ -34,9 +34,9 @@ CORNER_CONTOUR_AREA_MAX = 250
 """int: maximum area of the contour of the playfield corners."""
 
 # HSV color mapping intervals to find pinball playfield corners
-LOWER_YELLOW = [20, 130, 130]
-UPPER_YELLOW = [30, 255, 255]
-LOWER_BLUE = [100, 140, 20]
-UPPER_BLUE = [130, 255, 255]
+CORNER_LOWER_YELLOW = [20, 130, 130]
+CORNER_UPPER_YELLOW = [30, 255, 255]
+CORNER_LOWER_BLUE = [100, 140, 20]
+CORNER_UPPER_BLUE = [130, 255, 255]
 
 
