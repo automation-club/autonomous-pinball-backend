@@ -3,7 +3,6 @@
 import cv2
 import numpy as np
 
-from . import logger
 
 class GeneralUtils:
     """Houses general utilities for manipulating images with OpenCV and Numpy."""
@@ -90,10 +89,8 @@ class GeneralUtils:
         new_img : np.ndarray
             The warped image.
         """
-        logger.debug(f"input rect_points: {rect_points}")
 
         rect_points = cls.sort_rect_points(rect_points).astype(np.float32)
-        logger.debug(f"sorted rect_points: {rect_points}")
         corner_points = np.array(
             [
                 [0, 0],
@@ -103,7 +100,6 @@ class GeneralUtils:
             ],
             dtype=np.float32,
         )
-        logger.debug(f"new corner points: {corner_points}")
 
         trans_mat = cv2.getPerspectiveTransform(rect_points, corner_points)
         return cv2.warpPerspective(img, trans_mat, (img.shape[1], img.shape[0]))

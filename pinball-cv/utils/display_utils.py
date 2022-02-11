@@ -4,6 +4,11 @@ import numpy as np
 
 
 class DisplayUtils:
+    # @classmethod
+    @staticmethod
+    def rotate_frame_counterclockwise(frame):
+        return cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    
     @classmethod
     def resize_img(cls, img, resolution_scale=1):
         return cv2.resize(
@@ -14,10 +19,11 @@ class DisplayUtils:
             ),
         )
 
-    @classmethod
-    def display_img(cls, img, window_name="img", wait_key=-1, resolution_scale=1):
-        cv2.imshow(window_name, cls.resize_img(img, resolution_scale))
-        cv2.waitKey(wait_key)
+    @staticmethod
+    def display_frame(frame, window_name="test", wait_key=0):
+        frame = cv2.resize(frame, (0, 0), fx=0.75, fy=0.75)
+        cv2.imshow(window_name, frame)
+        # cv2.waitKey(wait_key)
 
     @classmethod
     def detect_draw_contours(cls, src, dest=None):
