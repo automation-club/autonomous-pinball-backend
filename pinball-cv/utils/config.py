@@ -3,7 +3,7 @@ from pathlib import Path
 
 # Datasets
 # Resolve changes symlinks to absolute path
-DATASET_DIRECTORY_PATH = Path("../datasets/").resolve()
+DATASET_DIRECTORY_PATH = Path("./datasets/").resolve()
 """Path: path to any datasets."""
 VIDEO_PATH: Path = (DATASET_DIRECTORY_PATH / "green.mp4").resolve()
 """Path: path to any test videos."""
@@ -30,6 +30,7 @@ CORNER_CONTOUR_AREA_MIN = 30
 """int: minimum area of the contour of the playfield corners."""
 CORNER_CONTOUR_AREA_MAX = 250
 """int: maximum area of the contour of the playfield corners."""
+
 
 # HSV color mapping intervals to find pinball playfield corners
 CORNER_LOWER_YELLOW = [20, 130, 130]
@@ -61,4 +62,12 @@ PINBALL_COLOR_RANGES = {
 [PINBALL_LOWER_COLOR, PINBALL_UPPER_COLOR] = PINBALL_COLOR_RANGES[PINBALL_COLOR]
 """List[int]: lower and upper bounds of pinball color to look for."""
 
+# Pinball Detection Tunable Parameters
+PINBALL_CONTOUR_MIN_AREA = 600
+"""int: minimum area of the contour of the pinball."""
+PINBALL_CONTOUR_MAX_AREA = 2000
+"""int: maximum area of the contour of the pinball."""
+PINBALL_CONTOUR_MAX_PERIMETER = 160
+"""int: maximum perimeter of the contour of the pinball."""
+PINBALL_CONTOUR_MAX_SIDES = 15
 

@@ -1,19 +1,9 @@
 import time
 import cv2
-import numpy as np
 
 from utils import *
 
-# TODOS:
 # TODO: add documentation everywhere
-# TODO: fix encapsulation by adding _ where applicable
-
-
-# create utils
-gen_utils = GeneralUtils()
-# disp_utils = DisplayUtils()
-pinball_utils = PinballUtils()
-user_input_utils = UserInputUtils()
 
 
 def main():
@@ -27,6 +17,7 @@ def main():
     prev_frame = None
     runs = 0
     while True:
+        # Read frame
         ok, curr_frame = cap.read()
         if not ok:
             print("Error reading frame")
@@ -56,21 +47,23 @@ def main():
         # Draw pinball coordinates
         if len(pinball_coordinates) == 1:
             DisplayUtils.draw_circles(warped_frame, pinball_coordinates, radius=8)
-        # TODO: pinball detection
 
         new_time = time.time()
         fps = f"FPS: {int(1 / (new_time - prev_time))}"
         cv2.putText(warped_frame, fps, (10, 30), fond, 1, (255, 255, 255), 2, cv2.LINE_AA)
         prev_time = new_time
         prev_frame = rotated_frame
-        DisplayUtils.display_frame(warped_frame, "Warped")
+
+        # Display frame
+        DisplayUtils.display_frame(warped_frame, "Post-processed frame")
+
         # Break out of loop if Q key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
             print("Stop program key pressed")
             break
         runs += 1
 
-    # Release the capture at end
+    # Release the capture at end of program
     cap.release()
     cv2.destroyAllWindows()
 
